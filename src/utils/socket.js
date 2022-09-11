@@ -17,13 +17,16 @@ export default function socket(app) {
                 data: message,
             })
                 .then((response) => {
-                    if (response.status === 200) {
+                    if (response.data.messages) {
                         io.sockets.emit('refreshChat', response.data);
                     } else {
-                        console.log('Fail');
+                        io.sockets.emit('reloadPage');
                     }
                 })
-                .catch((e) => console.error(e));
+                .catch((e) => {
+                    console.error(e);
+                    io.sockets.emit('reloadPage');
+                });
         });
 
         socket.on('createProduct', (product) => {
@@ -34,15 +37,18 @@ export default function socket(app) {
                 data: product,
             })
                 .then((response) => {
-                    if (response.status === 200) {
+                    if (response.data.product) {
                         io.sockets.emit('refreshProductList', [
                             response.data.product,
                         ]);
                     } else {
-                        console.log('Fail');
+                        io.sockets.emit('reloadPage');
                     }
                 })
-                .catch((e) => console.error(e));
+                .catch((e) => {
+                    console.error(e);
+                    io.sockets.emit('reloadPage');
+                });
         });
     });
 

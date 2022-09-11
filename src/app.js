@@ -1,31 +1,56 @@
 import path from 'path';
-import express from 'express';
-import socket from './utils/socket.js'
+import { SESSION_CONFIG } from './config.js';
 const __dirname = path.resolve(path.dirname(''));
 
-import messagesRouter from './routes/messages.routes.js'
-import productsRouter from './routes/products.routes.js'
-import productsTestRouter from './routes/productsTest.routes.js'
+
+import express from 'express';
+import socket from './utils/socket.js';
+import session from 'express-session';
+
+
+//Routers
+import messagesRouter from './routes/messages.routes.js';
+import productsRouter from './routes/products.routes.js';
+import productsTestRouter from './routes/productsTest.routes.js';
+import loginRouter from './routes/login.routes.js';
+import logoutRouter from './routes/logout.routes.js';
+
+
+//Middlewares
+import { checkSession } from './middlewares/checkSession.js';
+
 
 const app = express();
 
-app.use(express.json())
-app.set('views', __dirname + '/views')
-app.set('view engine', 'ejs')
+
+//Configuration
+app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use('/public', express.static(__dirname + '/public'))
+
+app.set('views', path.join(__dirname, '/views'));
+app.set('view engine', 'ejs');
+app.use('/public', express.static( path.join( __dirname, '/public') ) );
+
+app.use(session(SESSION_CONFIG));
 
 
 
-app.get('/', (req, res) => { res.render('index')})
-app.use('/api/products-test', productsTestRouter)
-app.use('/api/messages', messagesRouter);
-app.use('/api/products', productsRouter);
+
+//Routes
+app.use('/logout',              logoutRouter);
+app.use('/login',               loginRouter);
+app.use('/api/messages',        messagesRouter);
+app.use('/api/products',        productsRouter);
+app.use('/api/products-test',   productsTestRouter);
+
+app.get('/', checkSession, (req, res) => {
+    const username = req.session.username;
+    res.render('index', { username });
+});
+
 
 
 //Socket server
-const server = socket(app)
-
-
+const server = socket(app);
 
 export default server;

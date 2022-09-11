@@ -5,11 +5,11 @@ const chatForm = document.getElementById('chat');
 const createProductForm = document.getElementById('createProductForm');
 
 //On Product Submit Event
-createProductForm.addEventListener('submit', (e) => {
+createProductForm.addEventListener('submit', async(e) => {
     e.preventDefault();
     const form = new FormData(e.target);
     const product = Object.fromEntries(form.entries());
-
+    
     socket.emit('createProduct', product);
 });
 
@@ -31,6 +31,10 @@ socket.on('refreshProductList', (product) => {
 socket.on('refreshChat', (message) => {
     loadMessagesToChat(message);
 });
+
+socket.on('reloadPage', () => {
+    window.location.href = "http://localhost:8080/login" 
+})
 
 
 //Load first data
